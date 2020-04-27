@@ -163,7 +163,7 @@ int Shape::getHeight(){
 	return _height;
 }
 
-Glider::Glider(int x, int y): Shape(x, y, 3, 1){
+Blinker::Blinker(int x, int y): Shape(x, y, 3, 1){
 
 }
 

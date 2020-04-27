@@ -5,9 +5,9 @@ int main(){
 
 	Grid grid(10, 10);
 
-	Glider glider = Glider(5, 5);
+	Blinker blinker = Blinker(5, 5);
 
-	grid.addShape(glider);
+	grid.addShape(blinker);
 
 	// grid.printTheGrid();
 

@@ -34,9 +34,9 @@ private:
     
 };
 
-class Glider: public Shape{
+class Blinker: public Shape{
 public:
-    Glider(int x, int y);
+    Blinker(int x, int y);
 private:
 
 };
