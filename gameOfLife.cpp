@@ -68,7 +68,7 @@ void Grid::printTheGrid(){
 	std::cout << std::endl;
 	for(int i = 0; i < _width; i++){
 		for(int j = 0; j < _height; j++)
-			std::cout << ((Cells[i][j].isAlive()) ? 'X' : '.');
+			std::cout << ((Cells[i][j].isAlive()) ? 'X' : '.') << " ";
 		std::cout << std::endl;
 	}
 }
