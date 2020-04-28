@@ -41,6 +41,14 @@ private:
 
 };
 
+class Glider: public Shape{
+public:
+    Glider(int x, int y);
+
+private:
+
+};
+
 class Grid{
 
 public:

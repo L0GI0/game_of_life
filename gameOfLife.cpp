@@ -167,6 +167,13 @@ Blinker::Blinker(int x, int y): Shape(x, y, 3, 1){
 
 }
 
+Glider::Glider(int x, int y): Shape(x, y, 3, 3, ((std::shared_ptr<std::string[]>) 
+												new std::string[3] {".X.",
+										  	  		 		        "..X",
+																	"XXX"})){
+}
+
+
 GameOfLife::GameOfLife(Grid & grid): _grid(grid){
 
 }
@@ -174,8 +181,8 @@ GameOfLife::GameOfLife(Grid & grid): _grid(grid){
 void GameOfLife::startTheGame(){
 
 	while(true){
-		_grid.updateGrid();
 		_grid.printTheGrid();
+		_grid.updateGrid();
 
 		Sleep(1500);
 	}

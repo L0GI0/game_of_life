@@ -7,7 +7,11 @@ int main(){
 
 	Blinker blinker = Blinker(5, 5);
 
-	grid.addShape(blinker);
+	// grid.addShape(blinker);
+
+	Glider glider = Glider (5, 5);
+
+	grid.addShape(glider);
 
 	// grid.printTheGrid();
 
