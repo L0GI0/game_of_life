@@ -18,9 +18,9 @@ Shape::Shape(int x, int y, int width, int height, std::shared_ptr<std::string[]>
 
 		if (figure == NULL){
 		_figure = std::shared_ptr<std::string[]> (new std::string[_height]);
-		for(int i = 0; i < _height; i++)
+		for (int i = 0; i < _height; i++)
 			for(int j = 0; j < _width; j++)
-				_figure[i][j] = 'X';
+				_figure[i].push_back('X');
 		}else{
 			_figure = figure;
 		}

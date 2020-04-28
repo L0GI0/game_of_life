@@ -1,23 +1,23 @@
 #include "gameOfLife.h"
 
-
 int main(){
+
 
 	Grid grid(10, 10);
 
 	Blinker blinker = Blinker(5, 5);
 
-	// grid.addShape(blinker);
+	grid.addShape(blinker);
 
 	Glider glider = Glider (5, 5);
 
 	grid.addShape(glider);
 
-	// grid.printTheGrid();
+	grid.printTheGrid();
 
-	// grid.updateGrid();
+	grid.updateGrid();
 
-	// grid.printTheGrid();
+	grid.printTheGrid();
 
 	GameOfLife game = GameOfLife(grid);
 
