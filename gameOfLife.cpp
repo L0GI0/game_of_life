@@ -42,10 +42,10 @@ void Shape::printShape(){
 }
 
 
-Grid::Grid(int height, int width): _height(height), _width(width){
+Grid::Grid(int width, int height): _height(height), _width(width){
 
-	for(int i = 0; i < height; i++){
-		std::vector<Cell> row(width);
+	for(int i = 0; i < width; i++){
+		std::vector<Cell> row(height);
 		Cells.push_back(row);
 	}
 
@@ -54,6 +54,14 @@ Grid::Grid(int height, int width): _height(height), _width(width){
 			Cells[i][j] = Cell();
 		}
 	}
+}
+
+int Grid::getHeight(){
+	return _height;
+}
+
+int Grid::getWidth(){
+	return _width;
 }
 
 std::string Grid::getGridCellStatus(int x, int y){
@@ -66,9 +74,9 @@ std::string Grid::getGridCellStatus(int x, int y){
 
 void Grid::printTheGrid(){
 	std::cout << std::endl;
-	for(int i = 0; i < _width; i++){
-		for(int j = 0; j < _height; j++)
-			std::cout << ((Cells[i][j].isAlive()) ? 'X' : '.') << " ";
+	for(int i = 0; i < _height; i++){
+		for(int j = 0; j < _width; j++)
+			std::cout << ((Cells[j][i].isAlive()) ? 'X' : '.') << " ";
 		std::cout << std::endl;
 	}
 }
@@ -109,8 +117,8 @@ void Grid::updateGrid(){
 
 	updatedCells = Cells;
 
-	for(int i = 0; i < _height; i++){
-		for(int j = 0; j < _width; j++){
+	for(int i = 0; i < _width; i++){
+		for(int j = 0; j < _height; j++){
 			int numOfNeighbours = checkNumberOfLivingCellNeighbours(i, j);
 			if (numOfNeighbours == 3)
 				updatedCells[i][j].born();
@@ -138,9 +146,9 @@ void Grid::addShape(Shape &shape){
 	for(int i = 0; i < shape.getHeight(); i++){
 		for(int j = 0; j < shape.getWidth(); j++){
 			if(figure[i][j] == 'X'){
-				bornCell(shape.getYCoordinate() + i - moveVerticlyFromMiddle, shape.getXCoordinate() + j - moveHorizontallyFromMiddle);
+				bornCell(shape.getXCoordinate() + j - moveHorizontallyFromMiddle, shape.getYCoordinate() + i - moveVerticlyFromMiddle);
 			}else{
-				killCell(shape.getYCoordinate() + i - moveVerticlyFromMiddle, shape.getXCoordinate() + j - moveHorizontallyFromMiddle);
+				killCell(shape.getXCoordinate() + j - moveHorizontallyFromMiddle, shape.getYCoordinate() + i - moveVerticlyFromMiddle);
 			}
 		}
 	}
@@ -173,17 +181,63 @@ Glider::Glider(int x, int y): Shape(x, y, 3, 3, ((std::shared_ptr<std::string[]>
 																	"XXX"})){
 }
 
-
 GameOfLife::GameOfLife(Grid & grid): _grid(grid){
 
 }
 
-void GameOfLife::startTheGame(){
+void GameOfLife::startTheGame(float speed){
+
+	int count = 0;
 
 	while(true){
 		_grid.printTheGrid();
 		_grid.updateGrid();
+		count++;
 
-		Sleep(1500);
+		if (count == 5) {
+			saveToFile();
+			return;
+		}
+
+		Sleep(speed);
+	}
+}
+
+void GameOfLife::saveToFile(){
+
+	int aliveCount = 0;
+	int deadCount = 0;
+ 	std::ofstream testFile ("example.txt");
+
+ 	if(!myfile.is_open()){
+ 		stc::cout << "Cant open the file" << std::endl;
+ 		return;
+ 	}
+
+	for(int i = 0; i < _grid.getWidth(); i++){
+		for (int j = 0; j < _grid.getHeight(); j++) {
+			if (_grid.getGridCellStatus(i, j) == "Alive") {
+			aliveCount++;
+			if (deadCount != 0) {
+				testFile << ((deadCount == 1) ? "" : std::to_string(deadCount)) << 'd';
+				deadCount = 0;
+				}
+			}
+			else {
+				deadCount++;
+				if (aliveCount != 0) {
+					testFile << ((aliveCount == 1) ? "" : std::to_string(aliveCount)) << 'o';
+					aliveCount = 0;
+				}
+			}
+		}
+		if (deadCount != 0){
+			testFile << ((deadCount == 1) ? "" : std::to_string(deadCount)) << 'd';
+			deadCount = 0;
+		}else if (aliveCount != 0) {
+			testFile << ((aliveCount == 1) ? "" : std::to_string(aliveCount)) << 'o';
+			aliveCount = 0;
+		}
+		testFile << "$";
 	}
 }

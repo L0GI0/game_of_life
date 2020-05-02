@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <fstream>
 #include <typeinfo>
 #include <windows.h>
 #include <boost/program_options.hpp>
@@ -54,6 +55,8 @@ class Grid{
 
 public:
     Grid(int height, int width);
+    int getHeight();
+    int getWidth();
     void killCell(int x, int y);
     void bornCell(int x, int y);
     int checkNumberOfLivingCellNeighbours(int x, int y);
@@ -68,15 +71,13 @@ private:
 
 };
 
-
 class GameOfLife{
 
 public:
 
     GameOfLife(Grid & grid);
-    void startTheGame();
-
+    void startTheGame(float speed);
+    void saveToFile();
 private:
     Grid & _grid;
-
 };
