@@ -7,6 +7,7 @@
 #include <typeinfo>
 #include <windows.h>
 #include <boost/program_options.hpp>
+#include <boost/algorithm/string.hpp>
 
 class Cell{
 public:
@@ -59,12 +60,17 @@ public:
     int getWidth();
     void killCell(int x, int y);
     void bornCell(int x, int y);
+    void resetAndResize(int width, int height);
+    void setCellsFromRLE(std::string RLELine);
     int checkNumberOfLivingCellNeighbours(int x, int y);
     void updateGrid();
     void printTheGrid();
     void addShape(Shape &shape);
     std::string getGridCellStatus(int x, int y);
+
 private:
+    void setHeight(int height);
+    void setWidth(int width);
     int _height;
     int _width;
     std::vector <std::vector <Cell>> Cells;
@@ -77,7 +83,8 @@ public:
 
     GameOfLife(Grid & grid);
     void startTheGame(float speed);
-    void saveToFile();
+    void saveToFile(std::string filename = "RLEFile.txt");
+    void loadFromFile(std::string filename = "RLEFile.txt");
 private:
     Grid & _grid;
 };

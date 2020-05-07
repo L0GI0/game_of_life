@@ -64,6 +64,44 @@ int Grid::getWidth(){
 	return _width;
 }
 
+void Grid::setWidth(int width){
+	if (width < 10 || width > 100){
+		std::cout << "Invalid grid width" << std::endl;
+		return;
+	}
+	_width = width;
+}
+    
+void Grid::setHeight(int height){
+	if (height < 10 || height > 100){
+		std::cout << "Invalid grid height" << std::endl;
+		return;
+	}
+	_height = height;
+}
+
+void Grid::resetAndResize(int width, int height){
+	setWidth(width);
+	setHeight(height);
+
+	Cells.clear();
+
+	for(int i = 0; i < _width; i++){
+		std::vector<Cell> row(_height);
+		Cells.push_back(row);
+	}
+
+	for(int i = 0; i < _width; i++){
+		for(int j = 0; j < _height; j++){
+			Cells[i][j] = Cell();
+		}
+	}
+}
+
+void Grid::setCellsFromRLE(std::string RLELine){
+	std::cout << "Setting Grid form RLE \n";
+}
+
 std::string Grid::getGridCellStatus(int x, int y){
 	if (x < 0 || y < 0 || x >= _width || y >= _height)
 		return "No such cell";
@@ -185,59 +223,108 @@ GameOfLife::GameOfLife(Grid & grid): _grid(grid){
 
 }
 
+void GameOfLife::loadFromFile(std::string filename) {
+
+	std::ifstream RLEFile(filename);
+
+	if (!RLEFile.is_open()) {
+		std::cout << "Cant open the file" << std::endl;
+		return;
+	}
+
+	std::string gridSizeLine;
+
+
+	do {
+		std::getline(RLEFile, gridSizeLine);
+		gridSizeLine.erase(remove_if(gridSizeLine.begin(), gridSizeLine.end(), isspace), gridSizeLine.end());
+	} while (gridSizeLine[0] == '#');
+
+	boost::to_lower(gridSizeLine);
+
+	size_t xGridSizeIndex = gridSizeLine.find("x=", 0);
+	size_t yGridSizeIndex = gridSizeLine.find("y=", 0);
+	
+	std::cout << "Grid size line : " << std::endl << gridSizeLine << std::endl;
+
+	std::cout << "Grid size indexes = " << xGridSizeIndex << " " << yGridSizeIndex << std::endl;
+
+	std::cout << "Grid size substrings " << gridSizeLine.substr(xGridSizeIndex + 2, 2) << " " << gridSizeLine.substr(yGridSizeIndex + 2, 2) << std::endl;
+
+	int gridWidth = std::stoi(gridSizeLine.substr(xGridSizeIndex + 2, 2));
+	int gridHeight = std::stoi(gridSizeLine.substr(yGridSizeIndex + 2, 2));
+
+	std::cout << "Grid size =" << gridWidth << "x" << gridHeight << std::endl;
+
+	_grid.resetAndResize(gridWidth, gridHeight);
+
+	std::string RLELine;
+
+	do {
+		std::getline(RLEFile, RLELine);
+		RLELine.erase(remove_if(RLELine.begin(), RLELine.end(), isspace), RLELine.end());
+	} while (RLELine[0] == '#');	
+
+	_grid.setCellsFromRLE(RLELine);
+
+}
+
 void GameOfLife::startTheGame(float speed){
+
 
 	int count = 0;
 
 	while(true){
 		_grid.printTheGrid();
 		_grid.updateGrid();
-		count++;
 
 		if (count == 5) {
 			saveToFile();
+			loadFromFile();
 			return;
 		}
 
+		count++;
 		Sleep(speed);
 	}
 }
 
-void GameOfLife::saveToFile(){
+void GameOfLife::saveToFile(std::string filename){
 
 	int aliveCount = 0;
 	int deadCount = 0;
- 	std::ofstream testFile ("example.txt");
+ 	std::ofstream RLEFile(filename);
 
- 	if(!myfile.is_open()){
- 		stc::cout << "Cant open the file" << std::endl;
+ 	if(!RLEFile.is_open()){
+ 		std::cout << "Cant open the file" << std::endl;
  		return;
  	}
-
+	RLEFile << "x = " << _grid.getWidth() << ", y = " << _grid.getHeight() << std::endl;
 	for(int i = 0; i < _grid.getWidth(); i++){
 		for (int j = 0; j < _grid.getHeight(); j++) {
 			if (_grid.getGridCellStatus(i, j) == "Alive") {
 			aliveCount++;
 			if (deadCount != 0) {
-				testFile << ((deadCount == 1) ? "" : std::to_string(deadCount)) << 'd';
+				RLEFile << ((deadCount == 1) ? "" : std::to_string(deadCount)) << 'd';
 				deadCount = 0;
 				}
 			}
 			else {
 				deadCount++;
 				if (aliveCount != 0) {
-					testFile << ((aliveCount == 1) ? "" : std::to_string(aliveCount)) << 'o';
+					RLEFile << ((aliveCount == 1) ? "" : std::to_string(aliveCount)) << 'o';
 					aliveCount = 0;
 				}
 			}
 		}
 		if (deadCount != 0){
-			testFile << ((deadCount == 1) ? "" : std::to_string(deadCount)) << 'd';
+			RLEFile << ((deadCount == 1) ? "" : std::to_string(deadCount)) << 'd';
 			deadCount = 0;
 		}else if (aliveCount != 0) {
-			testFile << ((aliveCount == 1) ? "" : std::to_string(aliveCount)) << 'o';
+			RLEFile << ((aliveCount == 1) ? "" : std::to_string(aliveCount)) << 'o';
 			aliveCount = 0;
 		}
-		testFile << "$";
+		RLEFile << "$";
 	}
 }
+
