@@ -100,6 +100,37 @@ void Grid::resetAndResize(int width, int height){
 
 void Grid::setCellsFromRLE(std::string RLELine){
 	std::cout << "Setting Grid form RLE \n";
+
+	for (int j = 0; j < _height; j++) {
+		int endRowIndex = RLELine.find_first_of("$");
+		std::string row = RLELine.substr(0, endRowIndex);
+		RLELine = RLELine.substr(endRowIndex + 1, RLELine.length());
+		int currentRowIndex = 0;
+		while (row.length() != 0) {
+			int numOfCellsToChange = 0;
+			int firstAlpha = row.find_first_not_of("0123456789");
+
+			if (firstAlpha != 0) {
+				numOfCellsToChange = std::stoi(row.substr(0, firstAlpha));
+			}
+			else {
+				numOfCellsToChange = 1;
+			}
+			if (firstAlpha != 0) {
+			}
+			char cellsStatus = row[firstAlpha];
+			for (int i = currentRowIndex; i < currentRowIndex + numOfCellsToChange; i++) {
+				if (cellsStatus == 'o') {
+					Cells[i][j].born();
+				}
+				else {
+					Cells[i][j].kill();
+				}
+			}
+			currentRowIndex += numOfCellsToChange;
+			row = row.substr(firstAlpha + 1, row.length());
+		}
+	}
 }
 
 std::string Grid::getGridCellStatus(int x, int y){
@@ -228,7 +259,7 @@ void GameOfLife::loadFromFile(std::string filename) {
 	std::ifstream RLEFile(filename);
 
 	if (!RLEFile.is_open()) {
-		std::cout << "Cant open the file" << std::endl;
+		std::cout << "Cant open the " << filename << " file" << std::endl;
 		return;
 	}
 
@@ -244,17 +275,11 @@ void GameOfLife::loadFromFile(std::string filename) {
 
 	size_t xGridSizeIndex = gridSizeLine.find("x=", 0);
 	size_t yGridSizeIndex = gridSizeLine.find("y=", 0);
-	
-	std::cout << "Grid size line : " << std::endl << gridSizeLine << std::endl;
-
-	std::cout << "Grid size indexes = " << xGridSizeIndex << " " << yGridSizeIndex << std::endl;
-
-	std::cout << "Grid size substrings " << gridSizeLine.substr(xGridSizeIndex + 2, 2) << " " << gridSizeLine.substr(yGridSizeIndex + 2, 2) << std::endl;
 
 	int gridWidth = std::stoi(gridSizeLine.substr(xGridSizeIndex + 2, 2));
 	int gridHeight = std::stoi(gridSizeLine.substr(yGridSizeIndex + 2, 2));
 
-	std::cout << "Grid size =" << gridWidth << "x" << gridHeight << std::endl;
+	std::cout << "Grid size = " << gridWidth << "x" << gridHeight << std::endl;
 
 	_grid.resetAndResize(gridWidth, gridHeight);
 
@@ -265,6 +290,7 @@ void GameOfLife::loadFromFile(std::string filename) {
 		RLELine.erase(remove_if(RLELine.begin(), RLELine.end(), isspace), RLELine.end());
 	} while (RLELine[0] == '#');	
 
+	std::cout << "RLE Line = " << RLELine << std::endl;
 	_grid.setCellsFromRLE(RLELine);
 
 }
@@ -281,7 +307,6 @@ void GameOfLife::startTheGame(float speed){
 		if (count == 5) {
 			saveToFile();
 			loadFromFile();
-			return;
 		}
 
 		count++;
@@ -296,7 +321,7 @@ void GameOfLife::saveToFile(std::string filename){
  	std::ofstream RLEFile(filename);
 
  	if(!RLEFile.is_open()){
- 		std::cout << "Cant open the file" << std::endl;
+ 		std::cout << "Cant open the " << filename << " file" << std::endl;
  		return;
  	}
 	RLEFile << "x = " << _grid.getWidth() << ", y = " << _grid.getHeight() << std::endl;
@@ -327,4 +352,3 @@ void GameOfLife::saveToFile(std::string filename){
 		RLEFile << "$";
 	}
 }
-
