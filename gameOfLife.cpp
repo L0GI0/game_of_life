@@ -1,18 +1,36 @@
-#include "GameOfLife.h"
+#include "gameOfLife.h"
 
+Cell::Cell(const sf::Vector2f & cellSize, float xPosition, float yPosition) {
+	_cellShape.setSize(cellSize);
+	_cellShape.setPosition(xPosition, yPosition);
+	_cellShape.setFillColor(sf::Color::Black);
+	_cellShape.setOutlineColor(sf::Color::Black);
+	_cellShape.setOutlineThickness(1.0);
+}
+
+Cell::Cell() {
+
+}
 
 bool Cell::isAlive() const{
 	return _alive;
 }
 
 void Cell::kill(){
+	_cellShape.setFillColor(sf::Color::Black);
 	_alive = false;
 }
 
 
 void Cell::born(){
+	_cellShape.setFillColor(sf::Color::White);
 	_alive = true;
 }
+
+void Cell::draw(sf::RenderWindow& window) const {
+	window.draw(_cellShape);
+}
+
 
 Shape::Shape(int x, int y, int width, int height, std::shared_ptr<std::string[]> figure): _x(x), _y(y), _width(width), _height(height){
 
@@ -42,7 +60,10 @@ void Shape::printShape(){
 }
 
 
-Grid::Grid(int width, int height): _height(height), _width(width){
+Grid::Grid(int width, int height, sf::RenderWindow & window): _height(height), _width(width){
+
+	float cells_width =  window.getSize().x / _width;
+	float cells_height = (window.getSize().y - (window.getSize().y * 0.1))  / _height;
 
 	for(int i = 0; i < width; i++){
 		std::vector<Cell> row(height);
@@ -51,7 +72,7 @@ Grid::Grid(int width, int height): _height(height), _width(width){
 
 	for(int i = 0; i < width; i++){
 		for(int j = 0; j < height; j++){
-			Cells[i][j] = Cell();
+			Cells[i][j] = Cell(sf::Vector2f(cells_width, cells_height), cells_width * i, (cells_height * j) + (window.getSize().y * 0.1));
 		}
 	}
 }
@@ -80,9 +101,12 @@ void Grid::setHeight(int height){
 	_height = height;
 }
 
-void Grid::resetAndResize(int width, int height){
+void Grid::resetAndResize(int width, int height, sf::RenderWindow& window){
 	setWidth(width);
 	setHeight(height);
+
+	float cells_width = window.getSize().x / _width;
+	float cells_height = (window.getSize().y - (window.getSize().y * 0.1)) / _height;
 
 	Cells.clear();
 
@@ -93,7 +117,7 @@ void Grid::resetAndResize(int width, int height){
 
 	for(int i = 0; i < _width; i++){
 		for(int j = 0; j < _height; j++){
-			Cells[i][j] = Cell();
+			Cells[i][j] = Cell(sf::Vector2f(cells_width, cells_height), cells_width * i, (cells_height * j) + (window.getSize().y * 0.1));
 		}
 	}
 }
@@ -101,7 +125,7 @@ void Grid::resetAndResize(int width, int height){
 void Grid::setCellsFromRLE(std::string RLELine){
 	std::cout << "Setting Grid form RLE \n";
 
-	for (int j = 0; j < _height; j++) {
+	for (int j = 0; j < _width; j++) {
 		int endRowIndex = RLELine.find_first_of("$");
 		std::string row = RLELine.substr(0, endRowIndex);
 		RLELine = RLELine.substr(endRowIndex + 1, RLELine.length());
@@ -121,10 +145,10 @@ void Grid::setCellsFromRLE(std::string RLELine){
 			char cellsStatus = row[firstAlpha];
 			for (int i = currentRowIndex; i < currentRowIndex + numOfCellsToChange; i++) {
 				if (cellsStatus == 'o') {
-					Cells[i][j].born();
+					Cells[j][i].born();
 				}
 				else {
-					Cells[i][j].kill();
+					Cells[j][i].kill();
 				}
 			}
 			currentRowIndex += numOfCellsToChange;
@@ -150,6 +174,13 @@ void Grid::printTheGrid(){
 	}
 }
 
+void Grid::drawTheGrid(sf::RenderWindow & window){
+	std::cout << std::endl;
+	for (int i = 0; i < _height; i++) {
+		for (int j = 0; j < _width; j++)
+			Cells[j][i].draw(window);
+	}
+}
 
 void Grid::killCell(int x, int y){
 	Cells[x][y].kill();
@@ -158,6 +189,14 @@ void Grid::killCell(int x, int y){
 void Grid::bornCell(int x, int y){
 	Cells[x][y].born();
 }
+
+void Grid::changeCellStatus(int x, int y) {
+	if (Cells[x][y].isAlive())
+		Cells[x][y].kill();
+	else
+		Cells[x][y].born();
+}
+
 
 int Grid::checkNumberOfLivingCellNeighbours(int x, int y){
 
@@ -250,21 +289,20 @@ Glider::Glider(int x, int y): Shape(x, y, 3, 3, ((std::shared_ptr<std::string[]>
 																	"XXX"})){
 }
 
-GameOfLife::GameOfLife(Grid & grid): _grid(grid){
+GameOfLife::GameOfLife(Grid & grid, sf::RenderWindow & window): _grid(grid), _window(window){
 
 }
 
 void GameOfLife::loadFromFile(std::string filename) {
 
+	std::cout << "File name wen loading = " << filename << std::endl;
 	std::ifstream RLEFile(filename);
-
 	if (!RLEFile.is_open()) {
 		std::cout << "Cant open the " << filename << " file" << std::endl;
 		return;
 	}
 
 	std::string gridSizeLine;
-
 
 	do {
 		std::getline(RLEFile, gridSizeLine);
@@ -281,57 +319,38 @@ void GameOfLife::loadFromFile(std::string filename) {
 
 	std::cout << "Grid size = " << gridWidth << "x" << gridHeight << std::endl;
 
-	_grid.resetAndResize(gridWidth, gridHeight);
+	_grid.resetAndResize(gridWidth, gridHeight, _window);
 
 	std::string RLELine;
 
 	do {
 		std::getline(RLEFile, RLELine);
 		RLELine.erase(remove_if(RLELine.begin(), RLELine.end(), isspace), RLELine.end());
-	} while (RLELine[0] == '#');	
+	} while (RLELine[0] == '#');
 
 	std::cout << "RLE Line = " << RLELine << std::endl;
 	_grid.setCellsFromRLE(RLELine);
 
 }
 
-void GameOfLife::startTheGame(float speed){
-
-
-	int count = 0;
-
-	while(true){
-		_grid.printTheGrid();
-		_grid.updateGrid();
-
-		if (count == 5) {
-			saveToFile();
-			loadFromFile();
-		}
-
-		count++;
-		Sleep(speed);
-	}
-}
-
-void GameOfLife::saveToFile(std::string filename){
+void GameOfLife::saveToFile(std::string filename) {
 
 	int aliveCount = 0;
 	int deadCount = 0;
- 	std::ofstream RLEFile(filename);
+	std::ofstream RLEFile(filename);
 
- 	if(!RLEFile.is_open()){
- 		std::cout << "Cant open the " << filename << " file" << std::endl;
- 		return;
- 	}
+	if (!RLEFile.is_open()) {
+		std::cout << "Cant open the " << filename << " file" << std::endl;
+		return;
+	}
 	RLEFile << "x = " << _grid.getWidth() << ", y = " << _grid.getHeight() << std::endl;
-	for(int i = 0; i < _grid.getWidth(); i++){
+	for (int i = 0; i < _grid.getWidth(); i++) {
 		for (int j = 0; j < _grid.getHeight(); j++) {
 			if (_grid.getGridCellStatus(i, j) == "Alive") {
-			aliveCount++;
-			if (deadCount != 0) {
-				RLEFile << ((deadCount == 1) ? "" : std::to_string(deadCount)) << 'd';
-				deadCount = 0;
+				aliveCount++;
+				if (deadCount != 0) {
+					RLEFile << ((deadCount == 1) ? "" : std::to_string(deadCount)) << 'd';
+					deadCount = 0;
 				}
 			}
 			else {
@@ -342,13 +361,115 @@ void GameOfLife::saveToFile(std::string filename){
 				}
 			}
 		}
-		if (deadCount != 0){
+		if (deadCount != 0) {
 			RLEFile << ((deadCount == 1) ? "" : std::to_string(deadCount)) << 'd';
 			deadCount = 0;
-		}else if (aliveCount != 0) {
+		}
+		else if (aliveCount != 0) {
 			RLEFile << ((aliveCount == 1) ? "" : std::to_string(aliveCount)) << 'o';
 			aliveCount = 0;
 		}
 		RLEFile << "$";
 	}
+}
+
+void GameOfLife::startTheGame(float speed){
+	bool isPaused = false;
+	_grid.drawTheGrid(_window);
+	sf::RectangleShape topMenu;
+	topMenu.setSize(sf::Vector2f(_window.getSize().x, _window.getSize().y * 0.1));
+	_menuHeight = _window.getSize().y * 0.1;
+	topMenu.setPosition(0, 0);
+	topMenu.setFillColor(sf::Color::Cyan);
+	sf::Font font;
+	font.loadFromFile("arial.ttf");
+
+	sf::Text menuText;
+	sf::Text pauseText;
+	sf::Text loadText;
+	sf::Text saveText;
+
+	menuText.setFont(font);
+	menuText.setString("Menu");
+	menuText.setCharacterSize(24);
+	menuText.setFillColor(sf::Color::Black);
+	menuText.setPosition(sf::Vector2f((_window.getSize().x / 2) - 4, 0));
+
+	pauseText.setFont(font);
+	pauseText.setString("p - pause the game");
+	pauseText.setCharacterSize(14);
+	pauseText.setFillColor(sf::Color::Black);
+	pauseText.setPosition(sf::Vector2f(50, 40));
+
+	loadText.setFont(font);
+	loadText.setString("l - load the game from RLEFile.txt");
+	loadText.setCharacterSize(14);
+	loadText.setFillColor(sf::Color::Black);
+	loadText.setPosition(sf::Vector2f((_window.getSize().x / 2) - std::string("l - load the game from RLEFile.txt").length() * 2.5, 40));
+
+	saveText.setFont(font);
+	saveText.setString("s - save the game to RLEFile.txt");
+	saveText.setCharacterSize(14);
+	saveText.setFillColor(sf::Color::Black);
+	saveText.setPosition(sf::Vector2f((_window.getSize().x) - (std::string("s - save the game to RLEFile.txt").length() + 12) * 7, 40));
+	_window.display();
+
+    while (_window.isOpen()){
+        sf::Event event;
+		_window.draw(topMenu);
+		_window.draw(menuText);
+		_window.draw(pauseText);
+		_window.draw(loadText);
+		_window.draw(saveText);
+        while (_window.pollEvent(event)){
+            if (event.type == sf::Event::Closed)
+                _window.close();
+        }
+
+		if (event.type == sf::Event::Resized) {
+			_menuHeight = _window.getSize().y * 0.1;
+			std::cout << "menu size = " << _menuHeight << std::endl;
+		}
+
+		else if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+			sf::Vector2i mousePosition = sf::Mouse::getPosition(_window);
+			if (mousePosition.x >= 0 & mousePosition.x / floor(_window.getSize().x / _grid.getWidth()) < _grid.getWidth() &
+				mousePosition.y >= _menuHeight & ((mousePosition.y - _menuHeight) / floor(((_window.getSize().y - _menuHeight) / _grid.getHeight()))) < _grid.getHeight()) {
+				_grid.changeCellStatus(int(floor(mousePosition.x / floor(_window.getSize().x / _grid.getWidth()))), int((mousePosition.y - _menuHeight) / ((_window.getSize().y - _menuHeight) / _grid.getHeight())));
+				_grid.drawTheGrid(_window);
+				_window.display();
+			}
+		}
+
+		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::P)) {
+			if (!isPaused) {
+				isPaused = true;
+				std::cout << "Game paused" << std::endl;
+			}
+			else {
+				isPaused = false;
+				std::cout << "Game unpaused" << std::endl;
+			}
+		}
+
+		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)){
+			saveToFile();
+		}
+
+		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::L)) {
+			loadFromFile();
+			_grid.drawTheGrid(_window);
+			_window.display();
+			isPaused = false;
+		}
+
+		if (!isPaused) {
+			_grid.updateGrid();
+			_grid.drawTheGrid(_window);
+			_window.display();
+		}
+
+		Sleep(speed);
+    }
+	
 }

@@ -1,21 +1,22 @@
 #include "gameOfLife.h"
 
+
 int main(int argc, const char *argv[]){
 
 	using namespace boost::program_options;
 
-    int gridHeight = 10;
-    int gridWidth = 10;
-    float speedOfSimulation = 3000;
+    int gridHeight = 50;
+    int gridWidth = 50;
+    float speedOfSimulation = 100;
     std::string RLFile = "";
 
     try{
         options_description desc{ "Options" };
         desc.add_options()
             ("help,h", "Help screen")
-            ("width,w", value<int>()->default_value(10), "Board width")
-            ("height,h", value<int>()->default_value(10), "Board height")
-            ("speed,s", value<float>()->default_value(1500), "Speed of simulation in milliseconds")
+            ("width,w", value<int>()->default_value(50), "Board width")
+            ("height,h", value<int>()->default_value(50), "Board height")
+            ("speed,s", value<float>()->default_value(100), "Speed of simulation in milliseconds")
             ("init_file, initf,", value<std::string>(), "RL File containing starting board")
             ("config,c", value<std::string>(), "Config file");
 
@@ -27,6 +28,7 @@ int main(int argc, const char *argv[]){
 
         if (vm.count("init_file")) {
             RLFile = vm["init_file"].as<std::string>();
+            std::cout << "File = " << RLFile << std::endl;
         }
         else {
             if (vm.count("config")) {
@@ -57,7 +59,7 @@ int main(int argc, const char *argv[]){
 
             }
             if (vm.count("speed")) {
-                if (speedOfSimulation >= 1000 && speedOfSimulation <= 10000) {
+                if (speedOfSimulation >= 100 && speedOfSimulation <= 10000) {
                     speedOfSimulation = vm["speed"].as<float>();
                     std::cout << "Speed of simulation: " << vm["speed"].as<float>() << '\n';
                 }
@@ -69,11 +71,17 @@ int main(int argc, const char *argv[]){
         std::cerr << ex.what() << '\n';
     }
 
-    Grid grid(10, 10);
+    int windowWidth = 1920;
+    int windowHeight = 1080;
+    sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), "My window");
 
-    GameOfLife game = GameOfLife(grid);
+    Grid grid(gridHeight, gridWidth, window);
+
+
+    GameOfLife game = GameOfLife(grid, window);
 
     if (RLFile.compare("") != 0) {
+        std::cout << "File = " << RLFile << std::endl;
         game.loadFromFile(RLFile);
     }
     else {
