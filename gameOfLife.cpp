@@ -414,53 +414,59 @@ void GameOfLife::startTheGame(float speed){
 	saveText.setPosition(sf::Vector2f((_window.getSize().x) - (std::string("s - save the game to RLEFile.txt").length() + 12) * 7, 40));
 	_window.display();
 
-    while (_window.isOpen()){
-        sf::Event event;
+	while (_window.isOpen()) {
+		sf::Event event;
 		_window.draw(topMenu);
 		_window.draw(menuText);
 		_window.draw(pauseText);
 		_window.draw(loadText);
 		_window.draw(saveText);
-        while (_window.pollEvent(event)){
-            if (event.type == sf::Event::Closed)
-                _window.close();
-        }
+		while (_window.pollEvent(event)) {
 
-		if (event.type == sf::Event::Resized) {
-			_menuHeight = _window.getSize().y * 0.1;
-			std::cout << "menu size = " << _menuHeight << std::endl;
-		}
+			if (event.type == sf::Event::Closed)
+				_window.close();
 
-		else if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-			sf::Vector2i mousePosition = sf::Mouse::getPosition(_window);
-			if (mousePosition.x >= 0 & mousePosition.x / floor(_window.getSize().x / _grid.getWidth()) < _grid.getWidth() &
-				mousePosition.y >= _menuHeight & ((mousePosition.y - _menuHeight) / floor(((_window.getSize().y - _menuHeight) / _grid.getHeight()))) < _grid.getHeight()) {
-				_grid.changeCellStatus(int(floor(mousePosition.x / floor(_window.getSize().x / _grid.getWidth()))), int((mousePosition.y - _menuHeight) / ((_window.getSize().y - _menuHeight) / _grid.getHeight())));
+			if (event.type == sf::Event::Resized) {
+				_menuHeight = _window.getSize().y * 0.1;
+				std::cout << "menu size = " << _menuHeight << std::endl;
+				break;
+			}
+
+			else if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+				sf::Vector2i mousePosition = sf::Mouse::getPosition(_window);
+				if (mousePosition.x >= 0 & mousePosition.x / floor(_window.getSize().x / _grid.getWidth()) < _grid.getWidth() &
+					mousePosition.y >= _menuHeight & ((mousePosition.y - _menuHeight) / floor(((_window.getSize().y - _menuHeight) / _grid.getHeight()))) < _grid.getHeight()) {
+					_grid.changeCellStatus(int(floor(mousePosition.x / floor(_window.getSize().x / _grid.getWidth()))), int((mousePosition.y - _menuHeight) / ((_window.getSize().y - _menuHeight) / _grid.getHeight())));
+					_grid.drawTheGrid(_window);
+					_window.display();
+					break;
+				}
+			}
+
+			else if (sf::Keyboard::isKeyPressed(sf::Keyboard::P)) {
+				if (!isPaused) {
+					isPaused = true;
+					std::cout << "Game paused" << std::endl;
+				}
+				else {
+					isPaused = false;
+					std::cout << "Game unpaused" << std::endl;
+				}
+				Sleep(100);
+			}
+
+			else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+				saveToFile();
+				std::cout << "Save to file" << std::endl;
+				break;
+			}
+
+			else if (sf::Keyboard::isKeyPressed(sf::Keyboard::L)) {
+				loadFromFile();
 				_grid.drawTheGrid(_window);
 				_window.display();
-			}
-		}
-
-		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::P)) {
-			if (!isPaused) {
-				isPaused = true;
-				std::cout << "Game paused" << std::endl;
-			}
-			else {
 				isPaused = false;
-				std::cout << "Game unpaused" << std::endl;
 			}
-		}
-
-		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)){
-			saveToFile();
-		}
-
-		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::L)) {
-			loadFromFile();
-			_grid.drawTheGrid(_window);
-			_window.display();
-			isPaused = false;
 		}
 
 		if (!isPaused) {
@@ -468,8 +474,5 @@ void GameOfLife::startTheGame(float speed){
 			_grid.drawTheGrid(_window);
 			_window.display();
 		}
-
-		Sleep(speed);
-    }
-	
+	}
 }
