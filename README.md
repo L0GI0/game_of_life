@@ -4,22 +4,22 @@
 * [Built With](#built-with)
 * [Installation](#installation)
 * [Usage](#usage)
+* [Compatibility](#Compatibility)
 * [License](#license)
 * [Contact](#contact)
 
 
 ## About The Project
 
-Project written in C++ that implements an interactive Game of Life. Game has ability to save and load, current board status into a from RLE file.
+Project written in C++ that implements an interactive Game of Life. Game has ability to save and load current board status into a from RLE file.
 
-### Built With
+## Built With
 This section should list any major frameworks that you built your project using. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
 * [SFML](https://www.sfml-dev.org/)
 * [Boost Libraries](https://www.boost.org/)
 
 
-
-### Installation
+## Installation
 
 Download ['Game_of_life.zip'](https://github.com/L0GI0/game_of_life/blob/master/Game_of_life.zip) folder that contains builded game file and necessary .dll files.
 Unpack download file into one location.
@@ -28,6 +28,9 @@ Unpack download file into one location.
 
 Run GameOfLife.exe from unpacked 'Game_of_life.zip' folder in order to play the game.
 
+## Compatibility
+
+Windows 10
 
 ## License
 
