@@ -21,11 +21,12 @@ This section should list any major frameworks that you built your project using.
 
 ### Installation
 
-Download 'Game_executable' folder that contains game that's already builded.
+Download ['Game_of_life.zip'](https://github.com/L0GI0/game_of_life/blob/master/Game_of_life.zip) folder that contains builded game file and necessary .dll files.
+Unpack download file into one location.
 
 ## Usage
 
-Run GameOfLife.exe from 'Game_executable' in order to play the game.
+Run GameOfLife.exe from unpacked 'Game_of_life.zip' folder in order to play the game.
 
 
 ## License
