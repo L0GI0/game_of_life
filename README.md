@@ -10,12 +10,10 @@
 
 
 ## About The Project
-Project written in C++ that implements an interactive Game of Life. Game has ability to save and load current board status into a from RLE file.<br/>
+Project written in C++ that implements an interactive Game of Life. Game has ability to save and load current board status into a from RLE file.
+
+![game_of_life](https://github.com/L0GI0/Images/blob/master/Game_of_life_-_C%2B%2B__SFML__Boost.gif)<br/>
 ![YouTube](https://www.youtube.com/watch?v=f1NadrwLGPw)
-
-![game_of_life](https://github.com/L0GI0/Images/blob/master/Game_of_life_-_C%2B%2B__SFML__Boost.gif)
-
-
 ## Built With
 External libraries:
 * [SFML](https://www.sfml-dev.org/)
