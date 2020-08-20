@@ -26,13 +26,18 @@ Unpack download file into one location.
 Run GameOfLife.exe from unpacked 'Game_of_life.zip' folder in order to play the game.<br />
 
 If any option changes are required, game can be run from console level with any of the undermentioned options:<br />
+  >>><b>-h</b> [ --help ]             Help screen<br />
+  >>><b>-w</b> [ --width ] arg (=50)  Board width<br />
+  >>><b>-h</b> [ --height ] arg (=50) Board height<br />
+  >>><b>-s</b> [ --speed ] arg (=100) Speed of simulation in milliseconds<br />
+  >>><b>--init_file</b> arg           RL File containing starting board<br />
+  >>><b>-c</b> [ --config ] arg       Config file - contains options string with avaiable options settings
 
-  <b>-h</b> [ --help ]             Help screen<br />
-  <b>-w</b> [ --width ] arg (=50)  Board width<br />
-  <b>-h</b> [ --height ] arg (=50) Board height<br />
-  <b>-s</b> [ --speed ] arg (=100) Speed of simulation in milliseconds<br />
-  <b>--init_file</b> arg           RL File containing starting board<br />
-  <b>-c</b> [ --config ] arg       Config file - contains options string with avaiable options settings<br />
+Default settings:<br />
+  >>>Grid height: <b>50</b><br />
+  >>>Grid width: <b>50</b><br />
+  >>>Speed of simulation: <b>100</b><br />
+  >>>Starting the game with default grid due to lack of init file
 
 
 ## Compatibility
