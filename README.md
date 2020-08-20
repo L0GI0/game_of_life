@@ -46,7 +46,7 @@ Default settings:<br />
 
 ## Compatibility
 Windows 10 - Game executable.<br />
-Other systems - game can be builed in any systems by using resorce file. 
+Other systems - game can be builed in any systems by using resorce files. 
 
 ## License
 Free to use and modify.
